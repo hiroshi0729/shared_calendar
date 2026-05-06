@@ -1,0 +1,11 @@
+<h1>共有カレンダーアプリ</h1>
+
+<% if logged_in? %>
+  <p>ようこそ、<%= current_user.email %>さん！</p>
+  <%= button_to 'ログアウト', logout_path, method: :delete %>
+<% else %>
+  <div>
+    <%= link_to '新規登録', signup_path %>
+    <%= link_to 'ログイン', login_path %>
+  </div>
+<% end %>
