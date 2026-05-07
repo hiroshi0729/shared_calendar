@@ -14,6 +14,11 @@ class UsersController < ApplicationController
       render :new, status: :unprocessable_entity
     end
   end
+
+   # ユーザー一覧
+   def index
+    @users = User.where.not(id: current_user.id)
+  end
   
   private
   

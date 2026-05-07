@@ -13,6 +13,19 @@ Rails.application.routes.draw do
 
   resources :events
 
+  # 友達機能のルーティング
+  resources :users, only: [:index]
+  resources :users, only: [] do
+    resources :friendships, only: [:create] do
+      member do
+        patch :accept
+        patch :reject
+      end
+    end
+  end
+  
+  resources :friendships, only: [:index, :destroy]
+
   # パスワードリセット
   resources :password_resets, only: [:new, :create, :edit, :update]
   

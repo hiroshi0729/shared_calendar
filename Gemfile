@@ -30,6 +30,8 @@ gem "jbuilder"
 # Use Redis adapter to run Action Cable in production
 # gem "redis", "~> 4.0"
 
+gem "dartsass-rails", "~> 0.4.0"
+
 # Use Kredis to get higher-level data types in Redis [https://github.com/rails/kredis]
 # gem "kredis"
 
@@ -67,7 +69,8 @@ group :development, :test do
   end
 
 # Use Sass to process CSS
-# gem "sassc-rails"
+gem 'sassc-rails'
+gem 'bootstrap', '~> 5.2'
 
 # Use Active Storage variants [https://guides.rubyonrails.org/active_storage_overview.html#transforming-images]
 # gem "image_processing", "~> 1.2"
