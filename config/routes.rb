@@ -1,6 +1,6 @@
 Rails.application.routes.draw do
-  get 'home/index'
-  root 'home#index'
+  # ログイン前のトップページ(ログイン画面を表示)
+  root 'sessions#new'
   
   # ユーザー登録
   get '/signup', to: 'users#new'
@@ -11,9 +11,12 @@ Rails.application.routes.draw do
   post '/login', to: 'sessions#create'
   delete '/logout', to: 'sessions#destroy'
 
-    # パスワードリセット
-    resources :password_resets, only: [:new, :create, :edit, :update]
-    # letter_opener_web のルーティング(開発環境のみ)
+  resources :events
+
+  # パスワードリセット
+  resources :password_resets, only: [:new, :create, :edit, :update]
+  
+  # letter_opener_web のルーティング(開発環境のみ)
   if Rails.env.development?
     mount LetterOpenerWeb::Engine, at: "/letter_opener"
   end

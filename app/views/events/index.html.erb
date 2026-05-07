@@ -1,0 +1,114 @@
+<% content_for :title, "#{current_user.name}さんのカレンダー" %>
+
+<% content_for :head do %>
+  <!-- FullCalendar CSS -->
+  <link href='https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.10/main.min.css' rel='stylesheet' />
+  <link href='https://cdn.jsdelivr.net/npm/@fullcalendar/daygrid@6.1.10/main.min.css' rel='stylesheet' />
+  <link href='https://cdn.jsdelivr.net/npm/@fullcalendar/timegrid@6.1.10/main.min.css' rel='stylesheet' />
+<% end %>
+
+<div class="container mx-auto px-4 py-8">
+  <h1 class="text-3xl font-bold mb-6"><%= current_user.name %>さんのカレンダー</h1>
+  
+  <div id="calendar"></div>
+</div>
+
+<!-- FullCalendar JavaScript -->
+<script src='https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.10/index.global.min.js'></script>
+<script src='https://cdn.jsdelivr.net/npm/@fullcalendar/daygrid@6.1.10/index.global.min.js'></script>
+<script src='https://cdn.jsdelivr.net/npm/@fullcalendar/timegrid@6.1.10/index.global.min.js'></script>
+<script src='https://cdn.jsdelivr.net/npm/@fullcalendar/interaction@6.1.10/index.global.min.js'></script>
+<script src='https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.10/locales/ja.global.min.js'></script>
+
+<script>
+  document.addEventListener('turbo:load', function() {
+    const calendarEl = document.getElementById('calendar');
+    
+    if (calendarEl) {
+      const calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'timeGridWeek',
+        headerToolbar: {
+          left: 'prev,next today',
+          center: 'title',
+          right: 'dayGridMonth,timeGridWeek,timeGridDay'
+        },
+        locale: 'ja',
+        buttonText: {
+          today: '今日',
+          month: '月',
+          week: '週',
+          day: '日'
+        },
+        slotMinTime: '00:00:00',
+        slotMaxTime: '24:00:00',
+        allDaySlot: true,
+        navLinks: true,
+        selectable: true,
+        selectMirror: true,
+        editable: true,
+        dayMaxEvents: true,
+        
+        events: '/events.json',
+        
+        select: function(info) {
+          const title = prompt('予定のタイトルを入力してください:');
+          
+          if (title) {
+            fetch('/events', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json', 
+                'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
+              },
+              body: JSON.stringify({
+                event: {
+                  title: title,
+                  start_time: info.startStr,
+                  end_time: info.endStr
+                }
+              })
+            })
+            .then(response => response.json())
+            .then(data => {
+              calendar.addEvent({
+                id: data.id,
+                title: data.title,
+                start: data.start_time,
+                end: data.end_time
+              });
+              calendar.unselect();
+            })
+            .catch(error => {
+              console.error('Error:', error);
+              alert('予定の作成に失敗しました');
+            });
+          } else {
+            calendar.unselect();
+          }
+        },
+        
+        eventClick: function(info) {
+          if (confirm(`「${info.event.title}」を削除しますか?`)) {
+            fetch(`/events/${info.event.id}`, {
+              method: 'DELETE',
+              headers: {
+                'Accept': 'application/json', 
+                'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
+              }
+            })
+            .then(() => {
+              info.event.remove();
+            })
+            .catch(error => {
+              console.error('Error:', error);
+              alert('予定の削除に失敗しました');
+            });
+          }
+        }
+      });
+      
+      calendar.render();
+    }
+  });
+</script>

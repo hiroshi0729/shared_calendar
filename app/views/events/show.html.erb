@@ -1,0 +1,14 @@
+<h1>予定の詳細</h1>
+
+<div>
+  <p><strong>タイトル:</strong> <%= @event.title %></p>
+  <p><strong>開始日時:</strong> <%= @event.start_time.strftime('%Y年%m月%d日 %H:%M') %></p>
+  <p><strong>終了日時:</strong> <%= @event.end_time.strftime('%Y年%m月%d日 %H:%M') %></p>
+  <p><strong>説明:</strong> <%= @event.description %></p>
+</div>
+
+<div>
+  <%= link_to '編集', edit_event_path(@event) %>
+  <%= link_to '削除', event_path(@event), data: { turbo_method: :delete, turbo_confirm: '本当に削除しますか?' } %>
+  <%= link_to '戻る', events_path %>
+</div>
