@@ -1,0 +1,71 @@
+// simple_calendar のスタイル
+@import "simple_calendar";
+
+// カスタムスタイル
+.simple-calendar {
+  table {
+    border-collapse: collapse;
+    width: 100%;
+  }
+
+  th {
+    background-color: #f8f9fa;
+    padding: 10px;
+    text-align: center;
+    border: 1px solid #dee2e6;
+  }
+
+  td {
+    height: 100px;
+    vertical-align: top;
+    padding: 5px;
+    border: 1px solid #dee2e6;
+  }
+
+  .today {
+    background-color: #fff3cd;
+  }
+
+  .prev-month, .next-month {
+    background-color: #f8f9fa;
+    color: #6c757d;
+  }
+
+  .event {
+    font-size: 12px;
+    padding: 2px 5px;
+    margin: 2px 0;
+    background-color: #007bff;
+    color: white;
+    border-radius: 3px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    
+    a {
+      color: white;
+      text-decoration: none;
+    }
+  }
+}
+
+.calendar-heading {
+  text-align: center;
+  margin-bottom: 20px;
+  
+  a {
+    margin: 0 10px;
+  }
+}
+
+// モーダルのカスタマイズ
+.modal-body {
+    p {
+      margin-bottom: 10px;
+      
+      strong {
+        display: inline-block;
+        width: 80px;
+      }
+    }
+  }

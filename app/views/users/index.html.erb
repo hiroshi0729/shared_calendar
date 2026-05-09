@@ -10,21 +10,25 @@
           <% friendship = current_user.friendships.find_by(friend: user) %>
           <% inverse_friendship = current_user.inverse_friendships.find_by(user: user) %>
           
-          <% if friendship %>
-            <% if friendship.pending? %>
-              <span class="badge bg-warning">申請中</span>
-            <% elsif friendship.accepted? %>
-              <span class="badge bg-success">友達</span>
+          <div>
+            <% if friendship %>
+              <% if friendship.pending? %>
+                <span class="badge bg-warning">申請中</span>
+              <% elsif friendship.accepted? %>
+                <span class="badge bg-success me-2">友達</span>
+                <%= link_to 'カレンダーを見る', calendar_user_path(user), class: 'btn btn-primary btn-sm' %>
+              <% end %>
+            <% elsif inverse_friendship %>
+              <% if inverse_friendship.pending? %>
+                <span class="badge bg-info">申請を受信中</span>
+              <% elsif inverse_friendship.accepted? %>
+                <span class="badge bg-success me-2">友達</span>
+                <%= link_to 'カレンダーを見る', calendar_user_path(user), class: 'btn btn-primary btn-sm' %>
+              <% end %>
+            <% else %>
+              <%= button_to '友達申請', user_friendships_path(user), method: :post, class: 'btn btn-primary btn-sm' %>
             <% end %>
-          <% elsif inverse_friendship %>
-            <% if inverse_friendship.pending? %>
-              <span class="badge bg-info">申請を受信中</span>
-            <% elsif inverse_friendship.accepted? %>
-              <span class="badge bg-success">友達</span>
-            <% end %>
-          <% else %>
-            <%= button_to '友達申請', user_friendships_path(user), method: :post, class: 'btn btn-primary btn-sm' %>
-          <% end %>
+          </div>
         </li>
       <% end %>
     </ul>

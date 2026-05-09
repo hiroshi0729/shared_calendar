@@ -1,0 +1,37 @@
+<div class="container">
+  <h1><%= @user.email %> さんのカレンダー</h1>
+  
+  <%= month_calendar(events: @events, attribute: :start_time) do |date, events| %>
+    <%= date.day %>
+    
+    <% events.each do |event| %>
+      <div class="event">
+        <%= link_to event.title, '#', data: { bs_toggle: 'modal', bs_target: "#eventModal#{event.id}" } %>
+      </div>
+      
+      <!-- モーダル -->
+      <div class="modal fade" id="eventModal<%= event.id %>" tabindex="-1" aria-labelledby="eventModalLabel<%= event.id %>" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="eventModalLabel<%= event.id %>"><%= event.title %></h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <p><strong>開始:</strong> <%= event.start_time.strftime('%Y年%m月%d日 %H:%M') %></p>
+              <p><strong>終了:</strong> <%= event.end_time.strftime('%Y年%m月%d日 %H:%M') %></p>
+              <% if event.body.present? %>
+                <p><strong>詳細:</strong> <%= event.body %></p>
+              <% end %>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">閉じる</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  <% end %>
+  
+  <%= link_to 'ユーザー一覧に戻る', users_path, class: 'btn btn-secondary mt-3' %>
+</div>

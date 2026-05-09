@@ -14,8 +14,10 @@ Rails.application.routes.draw do
   resources :events
 
   # 友達機能のルーティング
-  resources :users, only: [:index]
-  resources :users, only: [] do
+  resources :users, only: [:index] do
+    member do
+      get :calendar  # ← ここを追加
+    end
     resources :friendships, only: [:create] do
       member do
         patch :accept
