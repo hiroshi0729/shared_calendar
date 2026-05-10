@@ -45,4 +45,9 @@ class User < ApplicationRecord
   def friend_with?(other_user)
     accepted_friends.include?(other_user)
   end
+
+   # チャット関連のアソシエーション
+   has_many :chat_room_memberships, dependent: :destroy
+   has_many :chat_rooms, through: :chat_room_memberships
+   has_many :messages, dependent: :destroy
 end

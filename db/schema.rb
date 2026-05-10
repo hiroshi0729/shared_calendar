@@ -10,9 +10,28 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2026_05_07_073816) do
+ActiveRecord::Schema[7.0].define(version: 2026_05_10_122249) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "chat_room_memberships", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.bigint "chat_room_id", null: false
+    t.datetime "last_read_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["chat_room_id"], name: "index_chat_room_memberships_on_chat_room_id"
+    t.index ["user_id", "chat_room_id"], name: "index_chat_room_memberships_on_user_id_and_chat_room_id", unique: true
+    t.index ["user_id"], name: "index_chat_room_memberships_on_user_id"
+  end
+
+  create_table "chat_rooms", force: :cascade do |t|
+    t.integer "room_type", default: 0, null: false
+    t.string "name"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["room_type"], name: "index_chat_rooms_on_room_type"
+  end
 
   create_table "events", force: :cascade do |t|
     t.string "title"
@@ -36,6 +55,19 @@ ActiveRecord::Schema[7.0].define(version: 2026_05_07_073816) do
     t.index ["user_id"], name: "index_friendships_on_user_id"
   end
 
+  create_table "messages", force: :cascade do |t|
+    t.bigint "chat_room_id", null: false
+    t.bigint "user_id", null: false
+    t.text "content", null: false
+    t.datetime "deleted_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["chat_room_id", "created_at"], name: "index_messages_on_chat_room_id_and_created_at"
+    t.index ["chat_room_id"], name: "index_messages_on_chat_room_id"
+    t.index ["deleted_at"], name: "index_messages_on_deleted_at"
+    t.index ["user_id"], name: "index_messages_on_user_id"
+  end
+
   create_table "users", force: :cascade do |t|
     t.string "email", null: false
     t.string "crypted_password"
@@ -51,7 +83,11 @@ ActiveRecord::Schema[7.0].define(version: 2026_05_07_073816) do
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
+  add_foreign_key "chat_room_memberships", "chat_rooms"
+  add_foreign_key "chat_room_memberships", "users"
   add_foreign_key "events", "users"
   add_foreign_key "friendships", "users"
   add_foreign_key "friendships", "users", column: "friend_id"
+  add_foreign_key "messages", "chat_rooms"
+  add_foreign_key "messages", "users"
 end
