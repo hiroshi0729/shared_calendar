@@ -36,37 +36,37 @@ user2.events.create!(
   title: 'チームミーティング',
   start_time: Time.current + 1.day + 10.hours,
   end_time: Time.current + 1.day + 11.hours,
-  body: '週次のチームミーティング'
+  description: '週次のチームミーティング'  # ← body を description に変更
 )
 
 user2.events.create!(
   title: 'ランチ',
   start_time: Time.current + 2.days + 12.hours,
   end_time: Time.current + 2.days + 13.hours,
-  body: '友達とランチ'
+  description: '友達とランチ'  # ← body を description に変更
 )
 
 user2.events.create!(
   title: 'プレゼン準備',
   start_time: Time.current + 3.days + 14.hours,
   end_time: Time.current + 3.days + 16.hours,
-  body: 'プレゼン資料の作成'
+  description: 'プレゼン資料の作成'  # ← body を description に変更
 )
 
 user2.events.create!(
   title: '勉強会',
   start_time: Time.current + 5.days + 19.hours,
   end_time: Time.current + 5.days + 21.hours,
-  body: 'Rails勉強会'
+  description: 'Rails勉強会'  # ← body を description に変更
 )
 
-# user3 のイベントも作成（オプション）
+# user3 のイベントも作成(オプション)
 puts 'Creating events for user3...'
 user3.events.create!(
   title: 'コーディング',
   start_time: Time.current + 1.day + 15.hours,
   end_time: Time.current + 1.day + 17.hours,
-  body: '個人開発'
+  description: '個人開発'  # ← body を description に変更
 )
 
 puts 'Seed data created successfully!'

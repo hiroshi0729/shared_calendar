@@ -1,37 +1,58 @@
-<div class="container">
+<div class="container mt-4">
   <h1><%= @user.email %> さんのカレンダー</h1>
   
-  <%= month_calendar(events: @events, attribute: :start_time) do |date, events| %>
-    <%= date.day %>
-    
-    <% events.each do |event| %>
-      <div class="event">
-        <%= link_to event.title, '#', data: { bs_toggle: 'modal', bs_target: "#eventModal#{event.id}" } %>
-      </div>
-      
-      <!-- モーダル -->
-      <div class="modal fade" id="eventModal<%= event.id %>" tabindex="-1" aria-labelledby="eventModalLabel<%= event.id %>" aria-hidden="true">
-        <div class="modal-dialog">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title" id="eventModalLabel<%= event.id %>"><%= event.title %></h5>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-              <p><strong>開始:</strong> <%= event.start_time.strftime('%Y年%m月%d日 %H:%M') %></p>
-              <p><strong>終了:</strong> <%= event.end_time.strftime('%Y年%m月%d日 %H:%M') %></p>
-              <% if event.body.present? %>
-                <p><strong>詳細:</strong> <%= event.body %></p>
-              <% end %>
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">閉じる</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    <% end %>
-  <% end %>
+  <!-- FullCalendar を表示する領域 -->
+  <div id="calendar"></div>
   
   <%= link_to 'ユーザー一覧に戻る', users_path, class: 'btn btn-secondary mt-3' %>
 </div>
+
+<!-- FullCalendar の CSS -->
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet">
+
+<!-- FullCalendar の JavaScript -->
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/locales/ja.global.min.js"></script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var calendarEl = document.getElementById('calendar');
+    var isOwnCalendar = <%= @user == current_user ? 'true' : 'false' %>;
+    
+    var calendar = new FullCalendar.Calendar(calendarEl, {
+      locale: 'ja',
+      initialView: 'dayGridMonth',
+      headerToolbar: {
+        left: 'prev,next today',
+        center: 'title',
+        right: 'dayGridMonth,timeGridWeek,timeGridDay'
+      },
+      // JSON エンドポイントからイベントを読み込む
+      events: '<%= calendar_user_path(@user, format: :json) %>',
+      
+      // イベントクリック時の処理
+      eventClick: function(info) {
+        // プライベート情報（友達のカレンダー）の場合は詳細を表示しない
+        if (info.event.extendedProps.isPrivate) {
+          alert('この予定の詳細は非公開です');
+          return;
+        }
+        
+        // 自分のカレンダーの場合は詳細を表示
+        var eventTitle = info.event.title;
+        var eventStart = info.event.start.toLocaleString('ja-JP');
+        var eventEnd = info.event.end ? info.event.end.toLocaleString('ja-JP') : '未設定';
+        var eventDescription = info.event.extendedProps.description || '説明なし';
+        
+        alert(
+          'タイトル: ' + eventTitle + '\n' +
+          '開始: ' + eventStart + '\n' +
+          '終了: ' + eventEnd + '\n' +
+          '詳細: ' + eventDescription
+        );
+      }
+    });
+    
+    calendar.render();
+  });
+</script>
