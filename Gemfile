@@ -50,7 +50,13 @@ gem 'sorcery'
 gem 'simple_calendar', '~> 3.0'
 
 # フロントエンド
-gem 'tailwindcss-rails'
+gem 'tailwindcss-rails', '~> 2.0'
+
+# 画像アップロード
+gem 'carrierwave', '~> 3.0'
+
+# Active Storage (画像アップロード用)
+# gem 'image_processing', '~> 1.2'
 
 # デバッグ・開発用
 group :development, :test do

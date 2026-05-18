@@ -12,6 +12,14 @@ Rails.application.routes.draw do
   delete '/logout', to: 'sessions#destroy'
 
   resources :events
+  
+  # プロフィール編集
+  resource :profile, only: [:edit, :update]
+  
+  # チャット機能のルーティング
+  resources :chat_rooms, only: [:index, :show, :new, :create] do
+    resources :messages, only: [:create]
+  end
 
   # 友達機能のルーティング
   resources :users, only: [:index]

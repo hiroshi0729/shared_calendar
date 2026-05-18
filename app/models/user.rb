@@ -1,4 +1,5 @@
 class User < ApplicationRecord
+  has_one_attached :avatar
   authenticates_with_sorcery!
 
   # アソシエーション

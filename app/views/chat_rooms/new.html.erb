@@ -1,0 +1,26 @@
+<div class="container mt-4">
+  <h1>新規チャットルーム作成</h1>
+
+  <%= form_with model: @chat_room, url: chat_rooms_path, method: :post, local: true do |f| %>
+    <% if @chat_room.errors.any? %>
+      <div class="alert alert-danger">
+        <h4><%= pluralize(@chat_room.errors.count, "error") %> prohibited this chat_room from being saved:</h4>
+        <ul>
+          <% @chat_room.errors.full_messages.each do |message| %>
+            <li><%= message %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+
+    <div class="mb-3">
+      <%= f.label :name, 'チャットルーム名', class: 'form-label' %>
+      <%= f.text_field :name, class: 'form-control', placeholder: '例: プロジェクトA' %>
+    </div>
+
+    <div class="d-flex gap-2">
+      <%= f.submit '作成', class: 'btn btn-primary' %>
+      <%= link_to '戻る', chat_rooms_path, class: 'btn btn-secondary' %>
+    </div>
+  <% end %>
+</div>
