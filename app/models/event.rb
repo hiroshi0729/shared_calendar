@@ -1,6 +1,10 @@
 class Event < ApplicationRecord
   belongs_to :user
   
+  # ゲスト機能の追加
+  has_many :event_guests, dependent: :destroy
+  has_many :guests, through: :event_guests, source: :user
+
   validates :title, presence: true
   validates :start_time, presence: true
   validates :end_time, presence: true

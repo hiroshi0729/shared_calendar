@@ -1,4 +1,6 @@
 Rails.application.routes.draw do
+  get 'profiles/edit'
+  get 'profiles/update'
   # ログイン前のトップページ(ログイン画面を表示)
   root 'sessions#new'
   
@@ -12,6 +14,12 @@ Rails.application.routes.draw do
   delete '/logout', to: 'sessions#destroy'
 
   resources :events
+
+  # プロフィール
+  resource :profile, only: [:show, :edit, :update]
+
+  # 友達管理
+resources :friendships, only: [:index, :create, :destroy]
 
   # 友達機能のルーティング
   resources :users, only: [:index]

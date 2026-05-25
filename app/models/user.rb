@@ -1,8 +1,15 @@
 class User < ApplicationRecord
   authenticates_with_sorcery!
 
+  # プロフィール画像の設定
+  has_one_attached :avatar
+
   # アソシエーション
   has_many :events, dependent: :destroy
+
+  # ゲストとして招待されているイベント
+  has_many :event_guests, dependent: :destroy
+  has_many :guest_events, through: :event_guests, source: :event
   
   # 自分が申請した友達関係
   has_many :friendships, dependent: :destroy
@@ -20,19 +27,29 @@ class User < ApplicationRecord
   validates :password_confirmation, presence: true, if: -> { new_record? || changes[:crypted_password] }
   validates :reset_password_token, uniqueness: true, allow_nil: true
   
+  # プロフィール画像のバリデーション
+  validates :avatar, content_type: { in: ['image/png', 'image/jpeg'],
+                                     message: 'はPNG、JPG、JPEG形式のみ対応しています' },
+                     size: { less_than: 5.megabytes,
+                            message: 'は5MB以下にしてください' }
+  
   # 承認済みの友達を取得するメソッド
   def accepted_friends
     # 自分が申請して承認された友達
-    accepted_sent = friends.where(friendships: { status: 'accepted' })
-    # 自分が承認した友達
-    accepted_received = inverse_friends.where(friendships: { status: 'accepted' })
+    sent_friends = User.joins(:inverse_friendships)
+                      .where(friendships: { user_id: id, status: 'accepted' })
     
-    (accepted_sent + accepted_received).uniq
+    # 自分が承認した友達
+    received_friends = User.joins(:friendships)
+                          .where(friendships: { friend_id: id, status: 'accepted' })
+    
+    # 重複を除いて結合（ActiveRecord::Relation を返す）
+    User.where(id: sent_friends.pluck(:id) + received_friends.pluck(:id)).distinct
   end
   
   # 友達申請を送る
   def send_friend_request(friend)
-    friendships.create(friend: friend, status: 'pending')
+    friendships.create!(friend: friend, status: 'pending')
   end
   
   # 友達申請を承認する

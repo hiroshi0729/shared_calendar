@@ -30,6 +30,8 @@ gem "jbuilder"
 # Use Redis adapter to run Action Cable in production
 # gem "redis", "~> 4.0"
 
+gem 'draper', '4.0.2'  # ← この行を追加
+
 gem "dartsass-rails", "~> 0.4.0"
 
 # Use Kredis to get higher-level data types in Redis [https://github.com/rails/kredis]
@@ -48,6 +50,8 @@ gem "bootsnap", require: false
 gem 'sorcery'
 
 gem 'simple_calendar', '~> 3.0'
+
+gem 'active_storage_validations'
 
 # フロントエンド
 gem 'tailwindcss-rails'

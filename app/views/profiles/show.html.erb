@@ -1,0 +1,62 @@
+<div class="container mt-5">
+  <h1 class="mb-4">マイページ</h1>
+
+  <!-- プロフィール情報 -->
+  <div class="card mb-4">
+    <div class="card-body">
+      <h2 class="card-title mb-4">プロフィール</h2>
+      
+      <div class="d-flex align-items-center mb-4">
+        <% if @user.avatar.attached? %>
+          <%= image_tag @user.avatar, class: 'rounded-circle me-4', style: 'width: 100px; height: 100px; object-fit: cover;' %>
+        <% else %>
+          <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center me-4" style="width: 100px; height: 100px;">
+            <i class="bi bi-person-fill text-white" style="font-size: 3rem;"></i>
+          </div>
+        <% end %>
+        
+        <div>
+          <h3 class="mb-1"><%= @user.decorate.full_name %></h3>
+          <p class="text-muted mb-0"><%= @user.email %></p>
+        </div>
+      </div>
+
+      <%= link_to 'プロフィールを編集', edit_profile_path, class: 'btn btn-primary' %>
+    </div>
+  </div>
+
+  <!-- 友達一覧 -->
+  <div class="card">
+    <div class="card-body">
+      <h2 class="card-title mb-4">友達一覧</h2>
+      
+      <% if @friends.any? %>
+        <div class="list-group">
+          <% @friends.each do |friend| %>
+            <div class="list-group-item d-flex justify-content-between align-items-center">
+              <div class="d-flex align-items-center">
+                <% if friend.avatar.attached? %>
+                  <%= image_tag friend.avatar, class: 'rounded-circle me-3', style: 'width: 50px; height: 50px; object-fit: cover;' %>
+                <% else %>
+                  <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
+                    <i class="bi bi-person-fill text-white" style="font-size: 1.5rem;"></i>
+                  </div>
+                <% end %>
+                <span class="fw-bold"><%= friend.full_name %></span>
+              </div>
+              
+              <div class="btn-group" role="group">
+                <!-- 将来的にチャット機能を追加する場所 -->
+                <!-- <%= link_to 'チャット', '#', class: 'btn btn-sm btn-success' %> -->
+                <%= button_to '友達を解除', friendship_path(friend), method: :delete, data: { turbo_confirm: '本当に削除しますか?' }, class: 'btn btn-sm btn-danger' %>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      <% else %>
+        <p class="text-muted">まだ友達がいません</p>
+        <%= link_to 'ユーザーを探す', users_path, class: 'btn btn-outline-primary' %>
+      <% end %>
+    </div>
+  </div>
+</div>

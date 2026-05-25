@@ -8,9 +8,44 @@
 <% end %>
 
 <div class="container mx-auto px-4 py-8">
-  <h1 class="text-3xl font-bold mb-6"><%= current_user.name %>さんのカレンダー</h1>
-  
-  <div id="calendar"></div>
+  <div class="flex gap-6">
+    <!-- 左側: 友達一覧 -->
+    <div class="w-64 flex-shrink-0">
+      <div class="bg-white rounded-lg shadow p-4">
+        <h2 class="text-lg font-bold mb-4">友達のカレンダーを表示</h2>
+        
+        <%= form_with url: events_path, method: :get, local: true, id: 'friend-filter-form' do |f| %>
+          <div class="space-y-2">
+            <% if @friends.present? %>
+              <% @friends.each do |friend| %>
+                <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-2 rounded">
+                  <%= check_box_tag 'friend_ids[]', friend.id, 
+                      params[:friend_ids]&.include?(friend.id.to_s),
+                      class: 'rounded border-gray-300 text-blue-600 focus:ring-blue-500',
+                      onchange: 'this.form.requestSubmit()' %>
+                  <span class="text-sm"><%= friend.name %></span>
+                </label>
+              <% end %>
+            <% else %>
+              <p class="text-sm text-gray-500">友達がいません</p>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- 右側: カレンダー -->
+    <div class="flex-1">
+      <div class="bg-white rounded-lg shadow p-6">
+        <div class="flex justify-between items-center mb-6">
+          <h1 class="text-2xl font-bold"><%= current_user.name %>さんのカレンダー</h1>
+          <%= link_to '新規予定作成', new_event_path, class: 'bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded' %>
+        </div>
+        
+        <div id="calendar"></div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- FullCalendar JavaScript -->
@@ -25,6 +60,10 @@
     const calendarEl = document.getElementById('calendar');
     
     if (calendarEl) {
+      // URLパラメータから friend_ids を取得
+      const urlParams = new URLSearchParams(window.location.search);
+      const friendIds = urlParams.getAll('friend_ids[]');
+      
       const calendar = new FullCalendar.Calendar(calendarEl, {
         initialView: 'timeGridWeek',
         headerToolbar: {
@@ -48,62 +87,46 @@
         editable: true,
         dayMaxEvents: true,
         
-        events: '/events.json',
-        
-        select: function(info) {
-          const title = prompt('予定のタイトルを入力してください:');
+        // イベントの取得処理を変更
+        events: function(info, successCallback, failureCallback) {
+          // friend_ids をクエリパラメータとして追加
+          const params = new URLSearchParams();
+          friendIds.forEach(id => params.append('friend_ids[]', id));
           
-          if (title) {
-            fetch('/events', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json', 
-                'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
-              },
-              body: JSON.stringify({
-                event: {
-                  title: title,
-                  start_time: info.startStr,
-                  end_time: info.endStr
-                }
-              })
-            })
+          fetch(`/events.json?${params.toString()}`)
             .then(response => response.json())
             .then(data => {
-              calendar.addEvent({
-                id: data.id,
-                title: data.title,
-                start: data.start_time,
-                end: data.end_time
-              });
-              calendar.unselect();
+              const events = data.map(event => ({
+                id: event.id,
+                title: event.title,
+                start: event.start_time,
+                end: event.end_time,
+                url: `/events/${event.id}`,
+                // 自分のイベントは青色、友達のイベントは緑色
+                backgroundColor: event.user_id === <%= current_user.id %> ? '#3b82f6' : '#10b981',
+                borderColor: event.user_id === <%= current_user.id %> ? '#2563eb' : '#059669',
+                // 自分のイベントのみ編集可能
+                editable: event.user_id === <%= current_user.id %>
+              }));
+              successCallback(events);
             })
             .catch(error => {
               console.error('Error:', error);
-              alert('予定の作成に失敗しました');
+              failureCallback(error);
             });
-          } else {
-            calendar.unselect();
-          }
+        },
+        
+        select: function(info) {
+          // 新規予定作成画面にリダイレクト(日時を引き継ぐ)
+          const startTime = encodeURIComponent(info.startStr);
+          const endTime = encodeURIComponent(info.endStr);
+          window.location.href = `/events/new?start_time=${startTime}&end_time=${endTime}`;
         },
         
         eventClick: function(info) {
-          if (confirm(`「${info.event.title}」を削除しますか?`)) {
-            fetch(`/events/${info.event.id}`, {
-              method: 'DELETE',
-              headers: {
-                'Accept': 'application/json', 
-                'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
-              }
-            })
-            .then(() => {
-              info.event.remove();
-            })
-            .catch(error => {
-              console.error('Error:', error);
-              alert('予定の削除に失敗しました');
-            });
+          info.jsEvent.preventDefault();
+          if (info.event.url) {
+            window.location.href = info.event.url;
           }
         }
       });
