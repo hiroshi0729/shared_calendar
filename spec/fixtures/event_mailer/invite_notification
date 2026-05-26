@@ -1,0 +1,3 @@
+EventMailer#invite_notification
+
+Hi, find me in app/views/event_mailer/invite_notification

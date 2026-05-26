@@ -62,4 +62,21 @@ class User < ApplicationRecord
   def friend_with?(other_user)
     accepted_friends.include?(other_user)
   end
+
+  # アイコン画像のURLを返すメソッド
+  def avatar_url
+    if avatar.attached?
+      # Active Storageで画像が添付されている場合
+      Rails.application.routes.url_helpers.rails_blob_url(avatar, only_path: true)
+    else
+      # UI Avatarsを使ってデフォルトアイコンを生成
+      display_name = name.presence || email.split('@').first
+      "https://ui-avatars.com/api/?name=#{CGI.escape(display_name)}&background=random&size=200"
+    end
+  end
+
+  # 指定したユーザーと友達かどうかをチェック
+  def friends_with?(other_user)
+    accepted_friends.include?(other_user)
+  end
 end

@@ -1,0 +1,13 @@
+<%= @guest.name %> さん
+
+<%= @organizer.name %> さんから以下のイベントに招待されました。
+
+イベント詳細
+- タイトル: <%= @event.title %>
+- 説明: <%= @event.description %>
+- 場所: <%= @event.location %>
+- 開始時間: <%= @event.start_time.strftime("%Y年%m月%d日 %H:%M") %>
+- 終了時間: <%= @event.end_time.strftime("%Y年%m月%d日 %H:%M") %>
+
+イベントの詳細は以下のリンクから確認できます。
+<%= event_url(@event) %>

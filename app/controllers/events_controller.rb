@@ -21,13 +21,15 @@ class EventsController < ApplicationController
         @friends = current_user.accepted_friends
       end
       format.json do
-        render json: @events.map { |event|
+        # ユーザー名も含めて返す(N+1問題を防ぐためincludesを使用)
+        render json: @events.includes(:user).map { |event|
           {
             id: event.id,
             title: event.title,
             start_time: event.start_time,
             end_time: event.end_time,
-            user_id: event.user_id  # カレンダーで色分けするために必要
+            user_id: event.user_id,
+            user_name: event.user.name  # ユーザー名を追加
           }
         }
       end
@@ -64,6 +66,10 @@ class EventsController < ApplicationController
           guest_ids = params[:event][:guest_ids].reject(&:blank?)
           guest_ids.each do |guest_id|
             @event.event_guests.create(user_id: guest_id)
+            
+            # ゲストに招待メールを送信
+            guest = User.find(guest_id)
+            EventMailer.invite_notification(@event, guest).deliver_later
           end
         end
         
@@ -87,12 +93,24 @@ class EventsController < ApplicationController
   def update
     respond_to do |format|
       if @event.update(event_params)
+        # 既存のゲストを取得
+        old_guest_ids = @event.guests.pluck(:id)
+        
         # ゲストを更新
         @event.event_guests.destroy_all
+        new_guest_ids = []
+        
         if params[:event][:guest_ids].present?
           guest_ids = params[:event][:guest_ids].reject(&:blank?)
           guest_ids.each do |guest_id|
             @event.event_guests.create(user_id: guest_id)
+            new_guest_ids << guest_id.to_i
+            
+            # 新しく追加されたゲストにのみ招待メールを送信
+            unless old_guest_ids.include?(guest_id.to_i)
+              guest = User.find(guest_id)
+              EventMailer.invite_notification(@event, guest).deliver_later
+            end
           end
         end
         
@@ -131,6 +149,6 @@ class EventsController < ApplicationController
   end
   
   def event_params
-    params.require(:event).permit(:title, :description, :start_time, :end_time, :location)
+    params.require(:event).permit(:title, :description, :start_time, :end_time, :location, guest_ids: [])
   end
 end

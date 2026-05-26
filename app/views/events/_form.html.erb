@@ -1,28 +1,62 @@
-<%= form_with model: @event, local: true do |f| %>
-    <%= render 'shared/error_messages', object: f.object %>
-    
-    <div class="mb-4">
-      <%= f.label :title, 'タイトル', class: 'label' %>
-      <%= f.text_field :title, class: 'input input-bordered w-full' %>
-    </div>
-    
-    <div class="mb-4">
-      <%= f.label :description, '説明', class: 'label' %>
-      <%= f.text_area :description, class: 'textarea textarea-bordered w-full', rows: 5 %>
-    </div>
-    
-    <div class="mb-4">
-      <%= f.label :start_time, '開始日時', class: 'label' %>
-      <%= f.datetime_local_field :start_time, class: 'input input-bordered w-full' %>
-    </div>
-    
-    <div class="mb-4">
-      <%= f.label :end_time, '終了日時', class: 'label' %>
-      <%= f.datetime_local_field :end_time, class: 'input input-bordered w-full' %>
-    </div>
-    
-    <div class="flex gap-2">
-      <%= f.submit @event.persisted? ? '更新' : '作成', class: 'btn btn-primary' %>
-      <%= link_to 'キャンセル', events_path, class: 'btn btn-ghost' %>
+<%= form_with(model: event, local: true) do |f| %>
+  <% if event.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(event.errors.count, "error") %> prohibited this event from being saved:</h2>
+      <ul>
+        <% event.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
     </div>
   <% end %>
+
+  <div class="field">
+    <%= f.label :title, "タイトル" %>
+    <%= f.text_field :title, class: "form-control" %>
+  </div>
+
+  <div class="field">
+    <%= f.label :description, "説明" %>
+    <%= f.text_area :description, class: "form-control" %>
+  </div>
+
+  <div class="field">
+    <%= f.label :location, "場所(任意)" %>
+    <%= f.text_field :location, class: "form-control" %>
+  </div>
+
+  <div class="field">
+    <%= f.label :start_time, "開始時間" %>
+    <%= f.datetime_local_field :start_time, class: "form-control" %>
+  </div>
+
+  <div class="field">
+    <%= f.label :end_time, "終了時間" %>
+    <%= f.datetime_local_field :end_time, class: "form-control" %>
+  </div>
+
+  <div class="field">
+  <%= f.label :guest_ids, "ゲストを招待(任意)" %>
+  
+  <% if current_user.accepted_friends.any? %>
+    <!-- 友達がいる場合はチェックボックスを表示 -->
+    <%= f.collection_check_boxes :guest_ids, current_user.accepted_friends, :id, :email do |b| %>
+      <div class="form-check">
+        <%= b.check_box class: "form-check-input" %>
+        <%= b.label class: "form-check-label" %>
+      </div>
+    <% end %>
+  <% else %>
+    <!-- 友達がいない場合はメッセージとリンクを表示 -->
+    <p class="text-muted">
+      まだ友達がいません。
+      <%= link_to "友達を追加", friends_path, class: "btn btn-sm btn-primary" %>
+      してからゲストを招待できます。
+    </p>
+  <% end %>
+</div>
+
+  <div class="actions">
+    <%= f.submit "保存", class: "btn btn-primary" %>
+  </div>
+<% end %>

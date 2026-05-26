@@ -1,34 +1,54 @@
-<div class="container">
-  <h1>ユーザー一覧</h1>
+<div class="container mx-auto px-4 py-8">
+  <!-- ヘッダー -->
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-800">友達一覧</h1>
+    <p class="text-gray-600 mt-2">承認済みの友達: <%= @friends.count %>人</p>
+  </div>
   
-  <% if @users.any? %>
-    <ul class="list-group">
-      <% @users.each do |user| %>
-        <li class="list-group-item d-flex justify-content-between align-items-center">
-          <%= user.email %>
-          
-          <% friendship = current_user.friendships.find_by(friend: user) %>
-          <% inverse_friendship = current_user.inverse_friendships.find_by(user: user) %>
-          
-          <% if friendship %>
-            <% if friendship.pending? %>
-              <span class="badge bg-warning">申請中</span>
-            <% elsif friendship.accepted? %>
-              <span class="badge bg-success">友達</span>
-            <% end %>
-          <% elsif inverse_friendship %>
-            <% if inverse_friendship.pending? %>
-              <span class="badge bg-info">申請を受信中</span>
-            <% elsif inverse_friendship.accepted? %>
-              <span class="badge bg-success">友達</span>
-            <% end %>
-          <% else %>
-            <%= button_to '友達申請', user_friendships_path(user), method: :post, class: 'btn btn-primary btn-sm' %>
-          <% end %>
-        </li>
+  <!-- 友達がいる場合 -->
+  <% if @friends.any? %>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <% @friends.each do |friend| %>
+        <div class="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden border border-gray-200">
+          <div class="p-6">
+            <!-- アイコンと名前を横並びに表示 -->
+            <div class="flex items-center gap-4 mb-4">
+              <!-- アイコン画像 -->
+              <div class="flex-shrink-0">
+                <img 
+                  src="<%= friend.avatar_url %>" 
+                  alt="<%= friend.name || friend.email %>" 
+                  class="w-16 h-16 rounded-full object-cover border-2 border-blue-500"
+                  onerror="this.src='https://ui-avatars.com/api/?name=User&background=random&size=200'"
+                >
+              </div>
+              <!-- 名前とメールアドレス -->
+              <div class="flex-1 min-w-0">
+                <h2 class="text-lg font-semibold text-gray-800 truncate">
+                  <%= friend.name.presence || friend.email.split('@').first %>
+                </h2>
+                <p class="text-sm text-gray-500 truncate"><%= friend.email %></p>
+              </div>
+            </div>
+            
+            <!-- アクションボタン -->
+            <div class="flex flex-col gap-2 mt-4">
+              <%= link_to "プロフィール", user_path(friend), 
+                class: "w-full px-4 py-2 bg-blue-600 text-white text-center rounded-lg hover:bg-blue-700 transition-colors duration-200 text-sm font-medium" %>
+              <%= link_to "チャット", "#", 
+                class: "w-full px-4 py-2 bg-green-600 text-white text-center rounded-lg hover:bg-green-700 transition-colors duration-200 text-sm font-medium",
+                data: { friend_id: friend.id } %>
+            </div>
+          </div>
+        </div>
       <% end %>
-    </ul>
+    </div>
   <% else %>
-    <p>他のユーザーがいません</p>
+    <!-- 友達がいない場合 -->
+    <div class="bg-white rounded-lg shadow-md p-8 text-center border border-gray-200">
+      <p class="text-gray-600 mb-4">まだ友達がいません</p>
+      <%= link_to "友達を検索", friendships_path, 
+        class: "inline-block px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium" %>
+    </div>
   <% end %>
 </div>

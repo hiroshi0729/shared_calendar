@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+</head>
+<body>
+  <h2>イベントに招待されました</h2>
+  
+  <p><%= @guest.name %> さん</p>
+  
+  <p><%= @organizer.name %> さんから以下のイベントに招待されました。</p>
+  
+  <h3>イベント詳細</h3>
+  <ul>
+    <li> **タイトル** : <%= @event.title %></li>
+    <li> **説明** : <%= @event.description %></li>
+    <li> **場所** : <%= @event.location %></li>
+    <li> **開始時間** : <%= @event.start_time.strftime("%Y年%m月%d日 %H:%M") %></li>
+    <li> **終了時間** : <%= @event.end_time.strftime("%Y年%m月%d日 %H:%M") %></li>
+  </ul>
+  
+  <p>イベントの詳細は以下のリンクから確認できます。</p>
+  <p><%= link_to "イベントを確認する", event_url(@event) %></p>
+</body>
+</html>

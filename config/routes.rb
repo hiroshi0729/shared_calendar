@@ -1,6 +1,4 @@
 Rails.application.routes.draw do
-  get 'profiles/edit'
-  get 'profiles/update'
   # ログイン前のトップページ(ログイン画面を表示)
   root 'sessions#new'
   
@@ -13,25 +11,24 @@ Rails.application.routes.draw do
   post '/login', to: 'sessions#create'
   delete '/logout', to: 'sessions#destroy'
 
+  # イベント
   resources :events
 
   # プロフィール
   resource :profile, only: [:show, :edit, :update]
 
-  # 友達管理
-resources :friendships, only: [:index, :create, :destroy]
-
-  # 友達機能のルーティング
-  resources :users, only: [:index]
-  resources :users, only: [] do
+  # ユーザー一覧(友達一覧)とユーザー詳細
+  resources :users, only: [:index, :show] do
+    # 友達リクエスト送信
     resources :friendships, only: [:create] do
       member do
-        patch :accept
-        patch :reject
+        patch :accept   # 友達リクエスト承認
+        patch :reject   # 友達リクエスト拒否
       end
     end
   end
   
+  # 友達リクエスト一覧と友達削除
   resources :friendships, only: [:index, :destroy]
 
   # パスワードリセット

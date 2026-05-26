@@ -5,43 +5,90 @@
   <link href='https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.10/main.min.css' rel='stylesheet' />
   <link href='https://cdn.jsdelivr.net/npm/@fullcalendar/daygrid@6.1.10/main.min.css' rel='stylesheet' />
   <link href='https://cdn.jsdelivr.net/npm/@fullcalendar/timegrid@6.1.10/main.min.css' rel='stylesheet' />
+  
+  <style>
+    /* ヘッダーの高さを考慮した全画面レイアウト */
+    .full-height-container {
+      height: calc(100vh - 56px); /* ヘッダーの高さ(56px)を引く */
+      overflow: hidden;
+    }
+    
+    .sidebar {
+      width: 280px;
+      overflow-y: auto;
+      border-right: 1px solid #dee2e6;
+    }
+    
+    .calendar-wrapper {
+      flex: 1;
+      overflow: hidden; /* スクロールを無効化 */
+      padding: 1rem 1.5rem; /* 左右にpaddingを追加 */
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .calendar-content {
+      background-color: white;
+      border-radius: 0.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      padding: 1.5rem;
+      flex: 1; /* 残りの高さを全て使う */
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    
+    .calendar-header {
+      margin-bottom: 1rem;
+      flex-shrink: 0; /* ヘッダーは縮小しない */
+    }
+    
+    #calendar {
+      flex: 1; /* 残りの高さを全て使う */
+      overflow: hidden;
+    }
+  </style>
 <% end %>
 
-<div class="container mx-auto px-4 py-8">
-  <div class="flex gap-6">
-    <!-- 左側: 友達一覧 -->
-    <div class="w-64 flex-shrink-0">
-      <div class="bg-white rounded-lg shadow p-4">
-        <h2 class="text-lg font-bold mb-4">友達のカレンダーを表示</h2>
-        
-        <%= form_with url: events_path, method: :get, local: true, id: 'friend-filter-form' do |f| %>
-          <div class="space-y-2">
-            <% if @friends.present? %>
-              <% @friends.each do |friend| %>
-                <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-2 rounded">
-                  <%= check_box_tag 'friend_ids[]', friend.id, 
-                      params[:friend_ids]&.include?(friend.id.to_s),
-                      class: 'rounded border-gray-300 text-blue-600 focus:ring-blue-500',
-                      onchange: 'this.form.requestSubmit()' %>
-                  <span class="text-sm"><%= friend.name %></span>
+<div class="container-fluid p-0">
+  <div class="row g-0 full-height-container">
+  <!-- 左側: 友達一覧 -->
+  <div class="col-auto sidebar bg-white">
+    <div class="p-3">
+      <h2 class="h5 mb-3">友達のカレンダーを表示</h2>
+      
+      <%= form_with url: events_path, method: :get, local: true, id: 'friend-filter-form' do |f| %>
+        <div class="d-flex flex-column gap-2">
+          <% if @friends.present? %>
+            <% @friends.each do |friend| %>
+              <div class="form-check">
+                <%= check_box_tag 'friend_ids[]', friend.id, 
+                    params[:friend_ids]&.include?(friend.id.to_s),
+                    class: 'form-check-input friend-checkbox',
+                    id: "friend_#{friend.id}",
+                    data: { friend_name: friend.name } %>
+                <label class="form-check-label" for="friend_<%= friend.id %>">
+                  <%= friend.name %>
                 </label>
-              <% end %>
-            <% else %>
-              <p class="text-sm text-gray-500">友達がいません</p>
+              </div>
             <% end %>
-          </div>
-        <% end %>
-      </div>
+          <% else %>
+            <p class="text-muted small">友達がいません</p>
+          <% end %>
+        </div>
+      <% end %>
     </div>
+  </div>
 
     <!-- 右側: カレンダー -->
-    <div class="flex-1">
-      <div class="bg-white rounded-lg shadow p-6">
-        <div class="flex justify-between items-center mb-6">
-          <h1 class="text-2xl font-bold"><%= current_user.name %>さんのカレンダー</h1>
-          <%= link_to '新規予定作成', new_event_path, class: 'bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded' %>
+    <div class="col calendar-wrapper bg-light">
+      <div class="calendar-content">
+        <div class="calendar-header d-flex justify-content-between align-items-center">
+          <h1 class="h3 mb-0"><%= current_user.name %>さんのカレンダー</h1>
+          <%= link_to '新規予定作成', new_event_path, class: 'btn btn-primary' %>
         </div>
         
+        <!-- カレンダー -->
         <div id="calendar"></div>
       </div>
     </div>
@@ -60,11 +107,17 @@
     const calendarEl = document.getElementById('calendar');
     
     if (calendarEl) {
-      // URLパラメータから friend_ids を取得
+      // 既存のカレンダーインスタンスがあれば削除(存在チェックを追加)
+      if (window.calendar && typeof window.calendar.destroy === 'function') {
+        window.calendar.destroy();
+      }
+      
       const urlParams = new URLSearchParams(window.location.search);
       const friendIds = urlParams.getAll('friend_ids[]');
       
-      const calendar = new FullCalendar.Calendar(calendarEl, {
+      console.log('友達のID:', friendIds); // デバッグ用
+      
+      window.calendar = new FullCalendar.Calendar(calendarEl, {
         initialView: 'timeGridWeek',
         headerToolbar: {
           left: 'prev,next today',
@@ -86,38 +139,54 @@
         selectMirror: true,
         editable: true,
         dayMaxEvents: true,
+        height: '100%',
+        aspectRatio: 1.5,
         
-        // イベントの取得処理を変更
         events: function(info, successCallback, failureCallback) {
-          // friend_ids をクエリパラメータとして追加
           const params = new URLSearchParams();
           friendIds.forEach(id => params.append('friend_ids[]', id));
           
+          console.log('イベント取得URL:', `/events.json?${params.toString()}`); // デバッグ用
+          
           fetch(`/events.json?${params.toString()}`)
-            .then(response => response.json())
+            .then(response => {
+              console.log('レスポンスステータス:', response.status); // デバッグ用
+              if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+              }
+              return response.json();
+            })
             .then(data => {
-              const events = data.map(event => ({
-                id: event.id,
-                title: event.title,
-                start: event.start_time,
-                end: event.end_time,
-                url: `/events/${event.id}`,
-                // 自分のイベントは青色、友達のイベントは緑色
-                backgroundColor: event.user_id === <%= current_user.id %> ? '#3b82f6' : '#10b981',
-                borderColor: event.user_id === <%= current_user.id %> ? '#2563eb' : '#059669',
-                // 自分のイベントのみ編集可能
-                editable: event.user_id === <%= current_user.id %>
-              }));
+              console.log('取得したイベント:', data); // デバッグ用
+              
+              const events = data.map(event => {
+                // 自分のイベントか友達のイベントかで色を変える
+                const isMyEvent = event.user_id === <%= current_user.id %>;
+                // タイトルに名前を追加(友達のイベントの場合)
+                const title = isMyEvent ? event.title : `${event.user_name}: ${event.title}`;
+                
+                return {
+                  id: event.id,
+                  title: title,
+                  start: event.start_time,
+                  end: event.end_time,
+                  url: `/events/${event.id}`,
+                  backgroundColor: isMyEvent ? '#3b82f6' : '#10b981',
+                  borderColor: isMyEvent ? '#2563eb' : '#059669',
+                  editable: isMyEvent
+                };
+              });
+              
+              console.log('カレンダーに表示するイベント:', events); // デバッグ用
               successCallback(events);
             })
             .catch(error => {
-              console.error('Error:', error);
+              console.error('エラー:', error);
               failureCallback(error);
             });
         },
         
         select: function(info) {
-          // 新規予定作成画面にリダイレクト(日時を引き継ぐ)
           const startTime = encodeURIComponent(info.startStr);
           const endTime = encodeURIComponent(info.endStr);
           window.location.href = `/events/new?start_time=${startTime}&end_time=${endTime}`;
@@ -128,10 +197,18 @@
           if (info.event.url) {
             window.location.href = info.event.url;
           }
+        },
+        
+        // カレンダーのレンダリング後に実行
+        eventDidMount: function(info) {
+          console.log('イベントが表示されました:', info.event.title); // デバッグ用
         }
       });
       
-      calendar.render();
+      window.calendar.render();
+      console.log('カレンダーがレンダリングされました'); // デバッグ用
+    } else {
+      console.error('カレンダー要素が見つかりません'); // デバッグ用
     }
   });
 </script>
