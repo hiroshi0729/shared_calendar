@@ -1,0 +1,35 @@
+/* Bootstrap の navbar-collapse を優先 */
+.navbar-collapse {
+    visibility: visible !important; /* Tailwind の visibility: collapse を上書き */
+  }
+  
+  /* レスポンシブ時のナビゲーション表示を制御 */
+  @media (max-width: 991.98px) {
+    .navbar-collapse:not(.show) {
+      display: none !important;
+    }
+    
+    .navbar-collapse.show {
+      display: block !important;
+      visibility: visible !important;
+    }
+  }
+  
+  /* デスクトップ表示では常に表示 */
+  @media (min-width: 992px) {
+    .navbar-collapse {
+      display: flex !important;
+      visibility: visible !important;
+    }
+  }
+  
+  /* ドロップダウンメニューは通常の Bootstrap の動作を維持 */
+  .dropdown-menu {
+    visibility: visible !important;
+    display: none; /* デフォルトは非表示 */
+  }
+  
+  .dropdown-menu.show {
+    display: block !important;
+    visibility: visible !important;
+  }
