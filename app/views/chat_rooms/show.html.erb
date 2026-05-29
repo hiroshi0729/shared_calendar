@@ -1,0 +1,40 @@
+<div class="container mx-auto px-4 py-8">
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="text-3xl font-bold"><%= @chat_room.name %></h1>
+    <%= link_to '一覧に戻る', chat_rooms_path, class: 'btn btn-secondary' %>
+  </div>
+
+  <!-- メッセージ一覧 -->
+  <div class="card mb-6" style="max-height: 500px; overflow-y: auto;">
+    <div id="messages" class="p-4 space-y-4">
+      <% @messages.each do |message| %>
+        <div class="flex items-start gap-3">
+          <!-- アイコン -->
+          <%= user_avatar(message.user) %>
+          </div>
+
+          <!-- メッセージ本体 -->
+          <div class="flex-1">
+            <div class="flex items-baseline gap-2 mb-1">
+              <span class="font-semibold"><%= message.user.email %></span>
+              <span class="text-sm text-gray-500"><%= message.created_at.strftime('%Y/%m/%d %H:%M') %></span>
+            </div>
+            <div class="bg-gray-100 rounded-lg p-3">
+              <%= message.content %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- メッセージ投稿フォーム -->
+  <div class="card">
+    <%= form_with model: [@chat_room, @message], local: true do |f| %>
+      <div class="mb-3">
+        <%= f.text_area :content, class: 'form-control', rows: 3, placeholder: 'メッセージを入力...' %>
+      </div>
+      <%= f.submit '送信', class: 'btn btn-primary' %>
+    <% end %>
+  </div>
+</div>

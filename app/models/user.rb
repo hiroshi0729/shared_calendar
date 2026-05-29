@@ -1,4 +1,5 @@
 class User < ApplicationRecord
+  has_one_attached :avatar
   authenticates_with_sorcery!
 
   # プロフィール画像の設定
@@ -19,6 +20,11 @@ class User < ApplicationRecord
   has_many :inverse_friendships, class_name: 'Friendship', 
            foreign_key: 'friend_id', dependent: :destroy
   has_many :inverse_friends, through: :inverse_friendships, source: :user
+  
+  # チャット関連のアソシエーション
+  has_many :chat_room_memberships, dependent: :destroy
+  has_many :chat_rooms, through: :chat_room_memberships
+  has_many :messages, dependent: :destroy
   
   # バリデーション
   validates :email, presence: true, uniqueness: true

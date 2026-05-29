@@ -5,6 +5,11 @@ import "@hotwired/stimulus-loading"
 import "controllers"
 import "bootstrap"
 
+// app/javascript/application.js
+import "@hotwired/turbo-rails"
+import "./controllers"
+import "./chat_rooms"
+
 // Turbo のページ読み込み後に Bootstrap のドロップダウンを初期化
 document.addEventListener("turbo:load", () => {
   // すべてのドロップダウン要素を取得

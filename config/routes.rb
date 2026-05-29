@@ -13,6 +13,14 @@ Rails.application.routes.draw do
 
   # イベント
   resources :events
+  
+  # プロフィール編集
+  resource :profile, only: [:edit, :update]
+  
+  # チャット機能のルーティング
+  resources :chat_rooms, only: [:index, :show, :new, :create] do
+    resources :messages, only: [:create]
+  end
 
   # プロフィール
   resource :profile, only: [:show, :edit, :update]

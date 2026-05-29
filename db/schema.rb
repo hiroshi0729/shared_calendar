@@ -10,7 +10,11 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
+<<<<<<< HEAD
 ActiveRecord::Schema[7.0].define(version: 2026_05_26_033438) do
+=======
+ActiveRecord::Schema[7.0].define(version: 2026_05_18_024820) do
+>>>>>>> feature/06_communication
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -61,6 +65,7 @@ ActiveRecord::Schema[7.0].define(version: 2026_05_26_033438) do
     t.index ["room_type"], name: "index_chat_rooms_on_room_type"
   end
 
+<<<<<<< HEAD
   create_table "event_guests", force: :cascade do |t|
     t.bigint "event_id", null: false
     t.bigint "user_id", null: false
@@ -71,6 +76,8 @@ ActiveRecord::Schema[7.0].define(version: 2026_05_26_033438) do
     t.index ["user_id"], name: "index_event_guests_on_user_id"
   end
 
+=======
+>>>>>>> feature/06_communication
   create_table "events", force: :cascade do |t|
     t.string "title"
     t.text "description"
@@ -127,8 +134,11 @@ ActiveRecord::Schema[7.0].define(version: 2026_05_26_033438) do
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "chat_room_memberships", "chat_rooms"
   add_foreign_key "chat_room_memberships", "users"
+<<<<<<< HEAD
   add_foreign_key "event_guests", "events"
   add_foreign_key "event_guests", "users"
+=======
+>>>>>>> feature/06_communication
   add_foreign_key "events", "users"
   add_foreign_key "friendships", "users"
   add_foreign_key "friendships", "users", column: "friend_id"
