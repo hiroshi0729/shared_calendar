@@ -20,6 +20,9 @@ Rails.application.routes.draw do
   # チャット機能のルーティング
   resources :chat_rooms, only: [:index, :show, :new, :create] do
     resources :messages, only: [:create]
+    collection do
+      get :direct_new  # 個人チャット作成用
+    end
   end
 
   # プロフィール
