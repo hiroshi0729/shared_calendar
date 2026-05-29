@@ -1,4 +1,6 @@
 Rails.application.routes.draw do
+    # Action Cable のマウント
+    mount ActionCable.server => '/cable'
   # ログイン前のトップページ(ログイン画面を表示)
   root 'sessions#new'
   
