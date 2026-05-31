@@ -23,6 +23,7 @@ class MessagesController < ApplicationController
   end
 
   def message_params
-    params.require(:message).permit(:content)
+    # :image パラメータを追加
+    params.require(:message).permit(:content, :image)
   end
 end
