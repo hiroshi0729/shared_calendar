@@ -29,4 +29,27 @@ class ChatRoom < ApplicationRecord
   def latest_message
     messages.order(created_at: :desc).first
   end
+  
+  # 🆕 特定のユーザーの未読メッセージ数を取得
+  def unread_count_for(user)
+    membership = chat_room_memberships.find_by(user: user)
+    return 0 unless membership
+    
+    # last_read_at より後に作成されたメッセージをカウント
+    messages.where('created_at > ?', membership.last_read_at || Time.at(0)).count
+  end
+  
+  # 🆕 特定のユーザーの未読メッセージを既読にする
+  def mark_as_read_for(user)
+    membership = chat_room_memberships.find_by(user: user)
+    return unless membership
+    
+    # last_read_at を現在時刻に更新
+    membership.update(last_read_at: Time.current)
+  end
+  
+  # 🆕 未読メッセージがあるか判定
+  def unread_for?(user)
+    unread_count_for(user) > 0
+  end
 end

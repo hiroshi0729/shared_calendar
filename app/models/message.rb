@@ -17,6 +17,10 @@ class Message < ApplicationRecord
   scope :not_deleted, -> { where(deleted_at: nil) }
   scope :recent, -> { order(created_at: :desc) }
   
+  # 🆕 未読・既読関連のスコープを追加
+  scope :unread, -> { where(read: false) }
+  scope :read_messages, -> { where(read: true) }
+  
   # 削除されているか
   def deleted?
     deleted_at.present?
@@ -32,6 +36,16 @@ class Message < ApplicationRecord
     return '(削除されたメッセージ)' if deleted?
     return content if content.present?
     '(画像)' if image.attached?
+  end
+  
+  # 🆕 既読にする
+  def mark_as_read!
+    update(read: true)
+  end
+  
+  # 🆕 未読かどうか
+  def unread?
+    !read
   end
   
   private

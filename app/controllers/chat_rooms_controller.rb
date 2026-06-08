@@ -11,13 +11,19 @@ class ChatRoomsController < ApplicationController
 
   # チャットルーム詳細
   def show
-    @messages = @chat_room.messages.includes(:user).order(created_at: :asc)
+    @messages = @chat_room.messages
+                          .not_deleted  # 🆕 削除されていないメッセージのみ
+                          .includes(:user)
+                          .order(created_at: :asc)
     @message = Message.new
+    
+    # 🆕 チャットルームを開いたら既読にする
+    @chat_room.mark_as_read_for(current_user)
   end
 
   # 個人チャット作成画面
   def direct_new
-    @chat_room = ChatRoom.new  # ← 追加
+    @chat_room = ChatRoom.new
     # 自分以外のユーザーを取得
     @users = User.where.not(id: current_user.id)
   end
