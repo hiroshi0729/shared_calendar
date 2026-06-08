@@ -14,12 +14,21 @@
           <div class="bg-white rounded-lg shadow p-4 hover:bg-gray-50 transition">
             <div class="flex items-center justify-between">
               <div class="flex-1">
-                <h2 class="text-xl font-semibold mb-2">
-                  <%= chat_room.display_name(current_user) %>
+                <h2 class="text-xl font-semibold mb-2 flex items-center gap-2">
+                  <span><%= chat_room.display_name(current_user) %></span>
+                  
+                  <%# 🆕 未読数バッジを追加 %>
+                  <% unread_count = chat_room.unread_count_for(current_user) %>
+                  <% if unread_count > 0 %>
+                  <span class="inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-black bg-red-600 rounded-full">
+                  <%= unread_count %>
+                </span>
+                  <% end %>
+                  
                   <% if chat_room.direct_message? %>
-                    <span class="text-sm text-gray-500 ml-2">(個人チャット)</span>
+                    <span class="text-sm text-gray-500">(個人チャット)</span>
                   <% else %>
-                    <span class="text-sm text-gray-500 ml-2">(グループチャット)</span>
+                    <span class="text-sm text-gray-500">(グループチャット)</span>
                   <% end %>
                 </h2>
                 <% if chat_room.latest_message %>
